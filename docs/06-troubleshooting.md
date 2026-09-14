@@ -79,3 +79,31 @@ Se você chegou aqui, é. Rode `make doctor`.
 ## Como reverter
 
 Cada linha da tabela aponta para o doc da correção, que tem sua reversão. Tudo de uma vez: [99-reverter-tudo.md](99-reverter-tudo.md).
+
+## O chiaki fecha sozinho segundos depois do vídeo começar
+
+**Sintoma:** a conexão completa (`StreamConnection successfully received streaminfo`), aparece o primeiro frame e o programa **some** — sem mensagem. No log de sessão a última linha é algo como `Added reference I frame 1` / `Frame mix contains an invalid frame`.
+
+**Confirme que é uma queda (crash):**
+
+```sh
+coredumpctl list --since today | grep chiaki          # SIGSEGV = caiu
+coredumpctl info <PID> | sed -n '/Stack trace/,$p' | head -8
+```
+
+Se o topo do stack trace mostrar `av_hwframe_transfer_data (libavutil…)`, a falha está na **transferência de frame do decodificador por hardware (VAAPI)** — caso real visto com Intel iHD 26.x + FFmpeg 8.x, e só quando um DualSense estava aberto pelo SDL.
+
+**Correção:** use o decodificador por software. Com o chiaki **fechado**:
+
+```sh
+# em ~/.config/Chiaki/Chiaki.conf, seção [settings]
+hw_decoder=
+```
+
+O valor **vazio** significa "software" (`none` **não** é aceito — o chiaki procura um decodificador literalmente chamado `none` e falha com `Hardware decoder "none" not found`). Na GUI é *Settings → Video → Hardware decoder → (nenhum)*. 720p/1080p a 60 fps em HEVC roda bem em CPU moderna.
+
+Para voltar ao hardware depois: apague a linha (o padrão é `auto`).
+
+## A imagem congela, mas o programa não fecha
+
+Veja no log se, no mesmo instante, houve rajada de perda: `Clamping reported packet loss: measured=20,0%`, `FEC failed`, `corrupt frame(s)`, seguidos de centenas de `[drop] reason=pending_overflow_evict … overflow queue full`. É a fila de renderização transbordando após perda no wifi. Costuma se recuperar sozinha em 1–2 minutos (os descartes caem a zero e o vídeo volta). Se não voltar, desconecte e reconecte a sessão. A causa é a rede, não o chiaki — em rede corporativa/hotel isso é comum.
