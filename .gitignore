@@ -14,3 +14,7 @@ dist/
 *.log
 *.tmp
 .cache/
+
+# Python (helper STUN em scripts/lib/)
+__pycache__/
+*.pyc
