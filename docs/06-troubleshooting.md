@@ -68,7 +68,7 @@ curl -sS -o /dev/null -w 'ssl=%{ssl_verify_result}\n' https://44-232-96-0-pushcl
 # binário: 1 = tem o fix
 strings /usr/bin/chiaki | grep -c 'contains %zu extra byte'
 # STUN: bloco presente?
-grep -c 'chiaki-ng-kit: STUN' /etc/hosts
+grep -c 'chiaki-ng-remote-play-kit STUN' /etc/hosts
 ```
 `make check` roda os três e mais o teste de NAT.
 

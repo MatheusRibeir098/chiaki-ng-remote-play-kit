@@ -1,0 +1,26 @@
+; Chiaki.conf.example — template do kit chiaki-ng-remote-play-kit
+;
+; Destino: ~/.config/Chiaki/Chiaki.conf  (aplicado por scripts/40-apply-config.sh)
+;
+; Só a seção [settings], só chaves NÃO sensíveis. O chiaki reescreve este arquivo
+; ao fechar e apaga os comentários — isto é normal.
+;
+; O QUE NÃO ESTÁ AQUI, DE PROPÓSITO:
+;   [registered_hosts]  -> rp_regist_key, console_pin, server_mac: gerados pelo
+;                          chiaki quando VOCÊ registra o SEU console (uma vez).
+;   psn_account_id, psn_auth_token, psn_refresh_token: gerados pelo login PSN na GUI.
+;   NUNCA copie essas chaves de outra pessoa. Elas dão acesso ao console dela.
+
+[settings]
+; Não perguntar "conectar via Remote Play?" toda vez.
+remote_play_ask=false
+
+; Log detalhado. Deixe false no dia a dia (gera milhares de linhas/min).
+; Ligue só para diagnosticar: scripts/40-apply-config.sh --verbose-log on
+log_verbose=false
+
+; Port guessing de NAT. Só ativar se o `make doctor` sugerir (NAT com reescrita
+; de porta). Em NAT comum não muda nada.
+;port_guessing_enabled=true
+;port_guessing_count=75
+;port_guessing_socket_count=250

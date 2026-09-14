@@ -13,7 +13,7 @@ Executa, nesta ordem: `10-install-ca-intermediate.sh --revert`, `30-stun-redirec
 
 ### 1. STUN no `/etc/hosts` (`30-stun-redirect.sh`)
 ```sh
-sudo sed -i '/# >>> chiaki-ng-remote-play-kit STUN' /etc/hosts
+sudo sed -i '/# >>> chiaki-ng-remote-play-kit STUN/,/# <<< chiaki-ng-remote-play-kit STUN/d' /etc/hosts
 sudo resolvectl flush-caches 2>/dev/null || true
 ```
 Backup: `/etc/hosts.bak-chiaki-kit-<data>`. Para restaurar o arquivo inteiro: `sudo cp /etc/hosts.bak-chiaki-kit-<data> /etc/hosts`.
@@ -52,7 +52,7 @@ Os `.bak` não são apagados automaticamente. Quando estiver satisfeito, pode re
 
 ```sh
 ls /etc/ca-certificates/trust-source/anchors/ | grep -c comodo   # 0
-grep -c 'chiaki-ng-kit' /etc/hosts                                # 0
+grep -c 'chiaki-ng-remote-play-kit STUN' /etc/hosts                                # 0
 pacman -Q chiaki-ng-git 2>&1 | grep -c 'não foi encontrado\|was not found'  # 1
 ```
 
