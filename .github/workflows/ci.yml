@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Lint dos scripts e varredura de segredos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar shellcheck e shfmt
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q shellcheck
+          curl -sSL -o /usr/local/bin/shfmt \
+            "https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_amd64"
+          sudo chmod +x /usr/local/bin/shfmt
+
+      - name: bash -n em todos os scripts
+        run: |
+          set -e
+          for f in scripts/*.sh scripts/lib/*.sh; do bash -n "$f"; done
+
+      - name: shellcheck
+        run: shellcheck -x -P SCRIPTDIR scripts/*.sh scripts/lib/*.sh
+
+      - name: shfmt (2 espaços, case indentado)
+        run: shfmt -d -i 2 -ci scripts/
+
+      - name: Nenhum segredo versionado
+        # Chaves do Chiaki.conf que carregam token/registro/PIN, e o PIN usado nos testes originais.
+        # Se este passo falhar, alguém commitou config real. Reverta o commit, não a regra.
+        run: |
+          set -e
+          if git ls-files -z | xargs -0 grep -nE 'psn_auth_token=|psn_refresh_token=|rp_regist_key=|console_pin=' -- ; then
+            echo "::error::Chave de segredo do Chiaki.conf encontrada em arquivo versionado"; exit 1
+          fi
+          if git ls-files -z | xargs -0 grep -nw '7856' -- ; then
+            echo "::error::PIN de teste encontrado em arquivo versionado"; exit 1
+          fi
+          if git ls-files | grep -qx 'config/Chiaki.conf'; then
+            echo "::error::config/Chiaki.conf versionado — só o .example pode existir"; exit 1
+          fi
+          echo "ok: nenhum segredo versionado"
+
+  pkgbuild:
+    name: Validar PKGBUILD em Arch
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preparar Arch e usuário de build
+        # makepkg se recusa a rodar como root; criamos um usuário sem senha com sudo.
+        run: |
+          pacman -Syu --noconfirm --needed namcap git sudo
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
+          chown -R builder:builder packaging/arch
+
+      - name: namcap PKGBUILD
+        run: cd packaging/arch && sudo -u builder namcap PKGBUILD
+
+      - name: makepkg --printsrcinfo
+        run: cd packaging/arch && sudo -u builder makepkg --printsrcinfo
+
+      - name: makepkg -o (só baixa as fontes no commit fixado)
+        # NÃO compila: o build completo (Qt6 + libplacebo) leva ~20 min e não cabe no CI de rotina.
+        # Aqui garantimos que o commit fixado existe no upstream e que os submódulos resolvem.
+        # O build de verdade é feito localmente antes de cada Release (ver packaging/arch/README.md).
+        run: cd packaging/arch && sudo -u builder makepkg -o --noconfirm
+
+  docs:
+    name: Links relativos da documentação
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verificar links relativos quebrados em .md
+        run: |
+          set -e
+          fail=0
+          while IFS= read -r -d '' md; do
+            dir=$(dirname "$md")
+            # captura [texto](caminho) ignorando http(s), mailto e âncoras puras
+            grep -oE '\]\(([^)#[:space:]]+)' "$md" | sed -E 's/^\]\(//' \
+              | grep -vE '^(https?:|mailto:)' | while read -r target; do
+                if [ ! -e "$dir/$target" ] && [ ! -e "$target" ]; then
+                  echo "::error file=$md::link quebrado -> $target"; fail=1
+                fi
+              done || fail=1
+          done < <(git ls-files -z '*.md')
+          [ "$fail" = 0 ] && echo "ok: links relativos válidos"
+          exit "$fail"
