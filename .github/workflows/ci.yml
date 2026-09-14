@@ -37,10 +37,10 @@ jobs:
         # Se este passo falhar, alguém commitou config real. Reverta o commit, não a regra.
         run: |
           set -e
-          if git ls-files -z | xargs -0 grep -nE 'psn_auth_token=|psn_refresh_token=|rp_regist_key=|console_pin=' -- ; then
+          if git ls-files -z -- . ':!.github/workflows' | xargs -0 grep -nE 'psn_auth_token=|psn_refresh_token=|rp_regist_key=|console_pin=' -- ; then
             echo "::error::Chave de segredo do Chiaki.conf encontrada em arquivo versionado"; exit 1
           fi
-          if git ls-files -z | xargs -0 grep -nw '7856' -- ; then
+          if git ls-files -z -- . ':!.github/workflows' | xargs -0 grep -nw '7856' -- ; then
             echo "::error::PIN de teste encontrado em arquivo versionado"; exit 1
           fi
           if git ls-files | grep -qx 'config/Chiaki.conf'; then
