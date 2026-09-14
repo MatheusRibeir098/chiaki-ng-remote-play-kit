@@ -146,7 +146,7 @@ O Remote Play pela internet passa por três etapas: uma conexão segura com os s
 Documentação por assunto:
 
 - [01 — O problema](docs/01-o-problema.md) · [02 — Certificado PSN](docs/02-certificado-psn.md) · [03 — Build](docs/03-build.md)
-- [04 — Rede restrita](docs/04-rede-restrita.md) · [05 — Primeira conexão](docs/05-primeira-conexao.md) · [06 — Troubleshooting](docs/06-troubleshooting.md)
+- [04 — Rede restrita](docs/04-rede-restrita.md) · [05 — Primeira conexão](docs/05-primeira-conexao.md) · [06 — Troubleshooting](docs/06-troubleshooting.md) · [07 — Controle DualSense](docs/07-controle-dualsense.md)
 - [99 — Reverter tudo](docs/99-reverter-tudo.md)
 
 ---

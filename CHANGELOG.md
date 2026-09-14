@@ -4,6 +4,10 @@ Todas as mudanças relevantes deste kit. Formato: [Keep a Changelog](https://kee
 
 ## [Unreleased]
 
+### Added
+
+- `docs/07-controle-dualsense.md` — DualSense "conectado" mas ignorado por Bluetooth (`!bonded`, sem link key): diagnóstico, re-pareamento e acesso hidraw para vibração/gatilhos.
+
 ## [0.1.0] - 2026-09-14
 
 ### Added
