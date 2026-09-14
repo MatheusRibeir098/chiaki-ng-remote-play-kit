@@ -70,11 +70,11 @@ jobs:
       - name: makepkg --printsrcinfo
         run: cd packaging/arch && sudo -u builder makepkg --printsrcinfo
 
-      - name: makepkg -o (só baixa as fontes no commit fixado)
+      - name: makepkg -o -d (só baixa as fontes no commit fixado)
         # NÃO compila: o build completo (Qt6 + libplacebo) leva ~20 min e não cabe no CI de rotina.
         # Aqui garantimos que o commit fixado existe no upstream e que os submódulos resolvem.
         # O build de verdade é feito localmente antes de cada Release (ver packaging/arch/README.md).
-        run: cd packaging/arch && sudo -u builder makepkg -o --noconfirm
+        run: cd packaging/arch && sudo -u builder makepkg -o -d --noconfirm
 
   docs:
     name: Links relativos da documentação

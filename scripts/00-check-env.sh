@@ -132,7 +132,7 @@ for line in "${results[@]}"; do
   for i in "${!stun_hosts[@]}"; do
     if [[ "${stun_hosts[$i]}" == "$hp" && "$status" != "OK" ]]; then
       blocked_hosts+=("$hp")
-      ((i < 7)) && ((blocked_first7++)) || true
+      if ((i < 7)); then ((blocked_first7++)) || true; fi
     fi
   done
   [[ "$JSON" == "1" ]] || printf '   %-8s %s\n' "$status" "$hp"
