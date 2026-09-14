@@ -1,0 +1,58 @@
+# Maintainer (deste kit): MatheusRibeir098
+# Baseado no PKGBUILD de chiaki-ng-git do AUR (WorMzy Tykashi), com o commit FIXADO.
+#
+# Por que fixar: o pacote `chiaki-ng` do AUR (pkgver 1.10.0) aponta para um commit de
+# ago/2025, ANTERIOR ao fix do customData1 de 17 bytes (PS5 Pro) — ver docs/03-build.md.
+# Este commit (2026-09-07) foi o que validamos funcionando de ponta a ponta.
+# O nome é mantido como chiaki-ng-git para que um futuro `yay -Syu` continue na linha -git
+# (qualquer commit mais novo do main também contém o fix).
+
+pkgname=chiaki-ng-git
+_gitname=chiaki-ng
+_commit=0e16950165f06e5c3291537c2eeba6e852be7120
+pkgver=2176_2026.09.07
+pkgrel=1
+pkgdesc="Free and Open Source PlayStation Remote Play Client (commit fixado com fix p/ PS5 Pro)"
+arch=(x86_64)
+url="https://streetpea.github.io/chiaki-ng/"
+license=('LicenseRef-AGPL-3.0-only-OpenSSL')
+depends=(
+  'curl' 'ffmpeg' 'fftw' 'gcc-libs' 'glibc' 'hicolor-icon-theme' 'hidapi' 'json-c'
+  'libidn2' 'libplacebo' 'libpsl' 'libssh2' 'miniupnpc' 'openssl' 'opus'
+  'qt6-base' 'qt6-declarative' 'qt6-svg' 'qt6-webengine' 'sdl2' 'speexdsp' 'zlib'
+)
+makedepends=('git' 'cmake' 'python-protobuf' 'python-setuptools' 'vulkan-headers')
+optdepends=(
+  'intel-media-driver: vaapi backend for Intel GPUs [>= Broadwell]'
+  'libva-intel-driver: vaapi backend for Intel GPUs [<= Haswell]'
+  'libva-vdpau-driver: vaapi backend for Nvidia and AMD GPUs'
+  'libva-mesa-driver: alternative vaapi backend for AMD GPUs'
+)
+provides=('chiaki')
+conflicts=('chiaki' 'chiaki-ng')
+source=("git+https://github.com/streetpea/${_gitname}.git#commit=${_commit}")
+sha256sums=('SKIP')
+
+prepare() {
+  cd "${_gitname}"
+  mkdir -p build
+  # usa o curl do sistema (é ele que lê o trust store com a intermediária instalada)
+  git rm -q third-party/curl
+  git submodule update --init
+}
+
+build() {
+  cd "${_gitname}/build"
+  export CFLAGS+=" -std=gnu17"
+  cmake .. -DCMAKE_INSTALL_PREFIX="/usr" -DCMAKE_BUILD_TYPE="None" -DCHIAKI_USE_SYSTEM_CURL="ON"
+  make
+}
+
+package() {
+  cd "${_gitname}/build"
+  make DESTDIR="${pkgdir}" install
+  install -dm755 "${pkgdir}/usr/share/licenses/${pkgname}/"
+  for lic in ../LICENSES/*; do
+    install -m644 "${lic}" "${pkgdir}/usr/share/licenses/${pkgname}/${lic##*/}"
+  done
+}

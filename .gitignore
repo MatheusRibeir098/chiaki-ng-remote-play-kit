@@ -1,0 +1,16 @@
+# Segredos — NUNCA versionar: contém token PSN, chave de registro do console e PIN
+Chiaki.conf
+*.conf.bak*
+Chiaki.conf.bak*
+
+# Saídas de build do makepkg e pacotes
+packaging/arch/src/
+packaging/arch/pkg/
+packaging/arch/*.pkg.tar.*
+packaging/arch/*.log
+dist/
+
+# Logs e temporários
+*.log
+*.tmp
+.cache/
