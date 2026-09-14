@@ -62,7 +62,10 @@ remove_old_aur_package() {
     log_warn "O pacote 'chiaki-ng' do AUR ($(pacman -Q chiaki-ng | awk '{print $2}')) está instalado."
     log_warn "Apesar do número de versão, ele foi compilado de um commit de ago/2025, ANTERIOR ao fix — é ele que falha com seu PS5."
     confirm "Remover 'chiaki-ng' para instalar a versão corrigida?"
-    run_sudo pacman -Rns --noconfirm chiaki-ng
+    # o AUR instala tambem chiaki-ng-debug; se ficar, conflita com o -debug do build novo
+    local _old_pkgs=(chiaki-ng)
+    pacman -Q chiaki-ng-debug >/dev/null 2>&1 && _old_pkgs+=(chiaki-ng-debug)
+    run_sudo pacman -Rns --noconfirm "${_old_pkgs[@]}"
   fi
 }
 
