@@ -34,5 +34,5 @@ revert: ## Desfaz tudo que o kit alterou no sistema
 	@echo "Para remover o pacote: sudo pacman -R chiaki-ng-git"
 
 lint: ## shellcheck + shfmt nos scripts
-	@shellcheck -x scripts/*.sh scripts/lib/*.sh
+	@shellcheck -x -P SCRIPTDIR scripts/*.sh scripts/lib/*.sh
 	@shfmt -d -i 2 -ci scripts/
